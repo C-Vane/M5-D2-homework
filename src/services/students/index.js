@@ -26,22 +26,21 @@ router.post("/", (req, res) => {
   if (checkBody(newStudent)) {
     const checkEmail = studentsArray.some((student) => student.Email === newStudent.Email);
     if (checkEmail) {
-      res.status(400).send("Student Email already used/Exists");
+      res.status(422).send("Student Email already used/Exists");
     } else {
       newStudent.id = uniqid();
       studentsArray.push(newStudent);
       fs.writeFileSync(path.join(__dirname, "students.json"), JSON.stringify(studentsArray));
       res.send(newStudent.id);
     }
-  } else res.status(400).send("Body missing data");
+  } else res.status(422).send("Body missing data");
 });
 //post check email
 router.post("/checkEmail", (req, res) => {
   const email = req.body.Email;
   console.log(email);
   const checkEmail = studentsArray.some((student) => student.Email === email);
-  if (checkEmail) res.send(true);
-  else res.send(false);
+  checkEmail ? res.status(210).send(true) : res.send(false);
 });
 // put/ edit student
 router.put("/:id", (req, res) => {
@@ -52,9 +51,8 @@ router.put("/:id", (req, res) => {
     studentsArray.forEach((student, index) => {
       if (student.id === req.params.id) {
         edited = index;
-      } else false;
+      } else res.status(400).send("Incorrect id");
     });
-    !edited && res.status(400).send("Incorrect id");
     studentsArray[edited] = editStudent;
     fs.writeFileSync(path.join(__dirname, "students.json"), JSON.stringify(studentsArray));
     res.send("edited");
